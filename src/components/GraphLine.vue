@@ -1,9 +1,16 @@
 <template>
   <div class="line"
-       :style="{left: line.center.x + 'px', top: line.center.y + 'px', width: line.length + 'px', transform: `rotate(${line.angle}rad)`, '--hue': line.hue}">
+       :style="{
+        left: line.center.x + 'px',
+        top: line.center.y + 'px',
+        width: line.length + 'px',
+        height: lineHeight + 'px',
+        transform: `rotate(${line.angle}rad)`,
+        '--hue': line.base.hue,
+  }">
   </div>
   <span :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
-        ref="span" @focusout="e => formattedWeight = e.target.innerText" contenteditable>{{ formattedWeight }}</span>
+        ref="span" @focusout="validateInput" @keydown.enter.prevent="validateInput" contenteditable>{{ formattedWeight }}</span>
 </template>
 <script lang="ts">
 import {Line} from "@/components/NodeGroup.vue";
@@ -19,12 +26,11 @@ export default defineComponent({
   },
   emits: {
     'update:weight': (newWeight: number) => true,
-    'spanfocusout': (e: Event) => true,
   },
   computed: {
     formattedWeight: {
       get(): string {
-        let weight = this.line.graphWeight;
+        let weight = this.line.base.graphWeight;
         if (weight == Infinity) return '∞';
         return weight.toString();
       },
@@ -39,7 +45,17 @@ export default defineComponent({
         this.$emit('update:weight', weight);
       }
     },
+    lineHeight(): number {
+      if (this.line.base.graphWeight == Infinity) return 2;
+      return Math.log2(this.line.base.graphWeight);
+    }
   },
+  methods: {
+    validateInput(e: Event) {
+      this.formattedWeight = (e.target as HTMLSpanElement).innerText;
+      (document.activeElement as HTMLElement)?.blur();
+    },
+  }
 })
 </script>
 <style scoped lang="scss">
@@ -50,7 +66,6 @@ export default defineComponent({
   border-radius: 1px;
   padding: 0;
   margin: 0;
-  height: 2px;
   line-height: 1px;
   background-color: hsl(var(--hue), 88%, 50%);
 }

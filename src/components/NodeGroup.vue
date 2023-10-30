@@ -15,19 +15,23 @@ type DataType = {
 
 type Coord = { x: number, y: number };
 
+type LineBase = {
+  hue: number,
+  graphWeight: number,
+  updateGraphWeight: (newWeight: number) => void,
+}
+
 type Link = {
   node1: GraphNode,
   node2: GraphNode,
-  hue: number,
-  graphWeight: number,
-}
+  base: LineBase
+};
 
 export type Line = {
   center: Coord,
   length: number,
   angle: number,
-  hue: number,
-  graphWeight: number,
+  base: LineBase,
 };
 
 export default defineComponent({
@@ -69,8 +73,18 @@ export default defineComponent({
             this.links.push({
               node1: node,
               node2: node1,
-              hue: node.display.hue,
-              graphWeight: link.linkWeight,
+              base: {
+                hue: node.display.hue,
+                graphWeight: link.linkWeight,
+                updateGraphWeight(newWeight: number) {
+                  link.linkWeight = newWeight;
+                  for (let link1 of node1.links) {
+                    if (link1.node.key === node.key) {
+                      link1.linkWeight = newWeight;
+                    }
+                  }
+                }
+              }
             });
           }
         }
@@ -78,7 +92,7 @@ export default defineComponent({
     }
   },
   methods: {
-    computeLine(start: Coord, end: Coord, hue: number, graphWeight: number): Line {
+    computeLine(start: Coord, end: Coord, base: LineBase): Line {
       // distance
       const length = Math.sqrt(((end.x - start.x) * (end.x - start.x)) + ((end.y - start.y) * (end.y - start.y)));
       // center
@@ -89,7 +103,7 @@ export default defineComponent({
       // angle (radians)
       const angle = Math.atan2((start.y - end.y), (start.x - end.x));
 
-      return {center, length, angle, hue, graphWeight};
+      return {center, length, angle, base};
     },
     mouseDown(node: GraphNode, event: MouseEvent) {
       this.movingNode = {
@@ -115,18 +129,24 @@ export default defineComponent({
     },
     buttonUpdatedName(event: Event, node: GraphNode) {
       let target = event.target as HTMLSpanElement;
-      if (! target.innerText) return;
-      node.name = target.innerText;
+      if (!target.innerText.trim()) return;
+      node.name = target.innerText.trim();
       for (let link of this.links) {
         if (link.node1 == node || link.node2 == node) {
-          link.hue = node.display.hue;
+          link.base.hue = node.display.hue;
         }
       }
+    },
+    updateLineWeight(line: Line, newWeight: number) {
+      line.base.graphWeight = newWeight;
+    },
+    blurFocus() {
+      (document.activeElement as HTMLElement)?.blur();
     }
   },
   computed: {
     lines(): Line[] {
-      return this.links.map(link => this.computeLine(link.node1.display, link.node2.display, link.hue, link.graphWeight));
+      return this.links.map(link => this.computeLine(link.node1.display, link.node2.display, link.base));
     }
   }
 })
@@ -134,12 +154,14 @@ export default defineComponent({
 
 <template>
   <div ref="lines-container">
-    <GraphLine v-for="line in lines" :key="line" :line="line"/>
+    <GraphLine v-for="line in lines" :key="line" :line="line"
+               @update:weight="newWeight => updateLineWeight(line, newWeight)"/>
   </div>
   <div ref="nodes-container">
     <GraphNodeButton v-for="node in nodes" :key="node.key" :id="'node-' + node.key" :node="node"
                      @mousedown="e => mouseDown(node, e)"
                      @update:name="e => buttonUpdatedName(e, node)"
-                     @spanfocusout="e => e.target.innerText = node.name"/>
+                     @spanfocusout="e => e.target.innerText = node.name"
+                     @keydown.enter.prevent="blurFocus"/>
   </div>
 </template>

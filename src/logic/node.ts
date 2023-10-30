@@ -39,6 +39,6 @@ export class GraphNode {
     }
 
     public infiniteLinkTo(node: GraphNode) {
-        this.linkTo(node, Number.MAX_VALUE);
+        this.linkTo(node, Infinity);
     }
 }

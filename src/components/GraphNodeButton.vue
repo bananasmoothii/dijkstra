@@ -6,8 +6,9 @@
 </template>
 <script lang="ts">
 import {GraphNode} from "@/logic/node";
+import {defineComponent} from "vue";
 
-export default {
+export default defineComponent({
   name: 'GraphNodeButton',
   props: {
     node: {
@@ -16,7 +17,7 @@ export default {
     }
   }
 }
-</script>
+)</script>
 
 <style scoped lang="scss">
 @import "@/scss/custom";
@@ -29,6 +30,8 @@ export default {
   padding: .3em .7em;
   background-color: hsl(var(--hue), 88%, 50%);
   transition: all 0.2s ease-in-out, top 0s linear, left 0s linear;
+  cursor: grab;
+  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.4);
 
   &:hover {
     box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.4);
@@ -39,6 +42,7 @@ export default {
     // adding a black shadow when the button is being moved
     box-shadow: 12px 12px 10px 3px rgba(0, 0, 0, 0.4);
     transform: translate(calc(-50% - 10px), calc(-50% - 10px));
+    cursor: grabbing;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <button v-for="node in nodes" :key="node" class="node"
+  <button class="node"
           :style="{left: node.display.x + 'px', top: node.display.y + 'px', '--hue': node.display.hue}">
     {{ node.name }}
   </button>
@@ -10,7 +10,10 @@ import {GraphNode} from "@/logic/node";
 export default {
   name: 'GraphNodeButton',
   props: {
-    nodes: Array as () => GraphNode[]
+    node: {
+      type: Object as () => GraphNode,
+      required: true
+    }
   }
 }
 </script>
@@ -25,10 +28,17 @@ export default {
   transform: translate(-50%, -50%);
   padding: .3em .7em;
   background-color: hsl(var(--hue), 88%, 50%);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out, top 0s linear, left 0s linear;
 
   &:hover {
-    box-shadow: 0 0 0 0.25em hsl(var(--hue), 100%, 95%);
+    box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.4);
+    transform: translate(calc(-50% - 5px), calc(-50% - 5px));
+  }
+
+  &.dragging {
+    // adding a black shadow when the button is being moved
+    box-shadow: 12px 12px 10px 3px rgba(0, 0, 0, 0.4);
+    transform: translate(calc(-50% - 10px), calc(-50% - 10px));
   }
 }
 </style>

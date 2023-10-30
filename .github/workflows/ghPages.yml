@@ -15,11 +15,18 @@ jobs:
       - name: Build app
         run: npm run build
 
+      - name: Archive build artifacts
+        run: |
+          tar \
+            --dereference --hard-dereference \
+            -cvf "dist.tar" \
+            dist
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: github-pages
-          path: dist
+          path: dist.tar
 
   # Deploy job
   deploy:

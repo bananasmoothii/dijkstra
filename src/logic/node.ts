@@ -40,10 +40,10 @@ export class GraphNode {
     set name(name: string) {
         if (! name) throw new Error('Name cannot be empty');
         this._name = name;
-        this.display.hue = this.getHueFromName(name);
+        this.display.hue = GraphNode.getHueFromName(name);
     }
 
-    private getHueFromName(name: string) {
+    private static getHueFromName(name: string) {
         return hues[name.charCodeAt(0) % hues.length];
     }
 
@@ -56,6 +56,21 @@ export class GraphNode {
             node: this,
             linkWeight: weight,
         });
+    }
+
+    public destroyLinkTo(node: GraphNode) {
+        this.links = this.links.filter(link => link.node._key !== node._key);
+        node.links = node.links.filter(link => link.node._key !== this._key);
+    }
+
+    public linkOrDestroyLinkTo(node: GraphNode, weight: number) {
+        if (this.links.some(link => link.node._key === node._key)) {
+            this.destroyLinkTo(node);
+            console.log('destroyed link');
+        } else {
+            this.linkTo(node, weight);
+            console.log('created link');
+        }
     }
 
     public infiniteLinkTo(node: GraphNode) {

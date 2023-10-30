@@ -9,7 +9,7 @@
         '--hue': line.base.hue,
   }">
   </div>
-  <span :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
+  <span v-if="!noweight" :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
         ref="span" @focusout="validateInput" @keydown.enter.prevent="validateInput" contenteditable>{{ formattedWeight }}</span>
 </template>
 <script lang="ts">
@@ -22,6 +22,10 @@ export default defineComponent({
     line: {
       type: Object as () => Line,
       required: true
+    },
+    noweight: {
+      type: Boolean,
+      default: false
     }
   },
   emits: {
@@ -46,7 +50,7 @@ export default defineComponent({
       }
     },
     lineHeight(): number {
-      if (this.line.base.graphWeight == Infinity) return 2;
+      if (this.line.base.graphWeight == Infinity || this.noweight) return 2;
       return Math.log2(this.line.base.graphWeight);
     }
   },

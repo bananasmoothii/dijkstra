@@ -11,6 +11,16 @@ type DataType = {
     node: GraphNode,
     offset: Coord,
   } | null,
+  movingLine: Line | null,
+  maxLinkDistance: number,
+  newNodeShadow: {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    isOverNode: boolean,
+  } | null,
+  lastTimeShadowOnShadow: number,
 }
 
 type Coord = { x: number, y: number };
@@ -52,6 +62,10 @@ export default defineComponent({
       links: [],
       nodes: [],
       movingNode: null,
+      movingLine: null,
+      maxLinkDistance: 60,
+      newNodeShadow: null,
+      lastTimeShadowOnShadow: 0,
     }
   },
   mounted() {
@@ -65,21 +79,19 @@ export default defineComponent({
         this.nodes = [];
         this.links = [];
         const nodesToAdd = [this.graph];
-        const excludedNodesLines: GraphNode[] = [];
-        console.log(this.graph);
+        console.log(this.graph)
         while (nodesToAdd.length > 0) {
           const node1 = nodesToAdd.pop() as GraphNode;
+          if (this.nodes.some(node => node.key === node1.key)) continue;
           this.nodes.push(node1);
           for (const link1 of node1.links) {
             // adding node
             let node2 = link1.node;
-            if (!this.nodes.includes(node2)) {
-              nodesToAdd.push(node2);
-            }
+            nodesToAdd.push(node2);
 
             // adding line between nodes, but not adding both lines because our graph is undirected
             if (this.links.some(link => link.node1 == node2 && link.node2 == node1)) continue;
-            let link2: {node: GraphNode, linkWeight: number} | undefined = undefined;
+            let link2: { node: GraphNode, linkWeight: number } | undefined = undefined;
             for (let link2Test of node2.links) {
               if (link2Test.node.key === node1.key) {
                 link2 = link2Test;
@@ -101,7 +113,8 @@ export default defineComponent({
             });
           }
         }
-      }
+      },
+      deep: true,
     }
   },
   methods: {
@@ -119,26 +132,113 @@ export default defineComponent({
       return {center, length, angle, base};
     },
     mouseDown(node: GraphNode, event: MouseEvent) {
-      this.movingNode = {
-        node,
-        offset: {
-          x: event.clientX - node.display.x,
-          y: event.clientY - node.display.y,
-        }
-      };
-      let htmlNode = document.getElementById('node-' + node.key) as HTMLElement;
-      htmlNode.classList.add('dragging');
+      if (this.linkNodesMode) {
+        this.movingNode = {
+          node,
+          offset: {
+            x: 0,
+            y: 0,
+          }
+        };
+        this.movingLine = this.computeLine(node.display, { // mouse coords
+          x: event.clientX,
+          y: event.clientY
+        }, {
+          hue: node.display.hue,
+          graphWeight: 1,
+          updateGraphWeight: () => {
+            throw new Error("Cannot update weight of a line that doesn't exist");
+          }
+        });
+      } else {
+        this.movingNode = {
+          node,
+          offset: {
+            x: event.clientX - node.display.x,
+            y: event.clientY - node.display.y,
+          }
+        };
+        let htmlNode = document.getElementById('node-' + node.key) as HTMLElement;
+        htmlNode.classList.add('dragging');
+      }
     },
     mouseMove(event: MouseEvent) {
       if (this.movingNode == null) return;
-      this.movingNode.node.display.x = event.clientX - this.movingNode.offset.x;
-      this.movingNode.node.display.y = event.clientY - this.movingNode.offset.y;
+      if (this.linkNodesMode) {
+        let x = event.clientX;
+        let y = event.clientY;
+        this.movingLine = this.computeLine(this.movingNode.node.display, {x, y}, this.movingLine!.base);
+        let closestNodeExceptMovingNode = this.getClosestNodeExceptMovingNode(x, y);
+        let {node, distanceSquared} = closestNodeExceptMovingNode || {node: null, distanceSquared: Infinity};
+        if (this.newNodeShadow == null) this.newNodeShadow = {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          isOverNode: false,
+        };
+        if (distanceSquared > this.square(this.maxLinkDistance)) {
+          this.newNodeShadow.x = x;
+          this.newNodeShadow.y = y;
+          this.newNodeShadow.width = 97;
+          this.newNodeShadow.height = 37;
+          this.newNodeShadow.isOverNode = false;
+        } else {
+          this.newNodeShadow.x = node!.display.x;
+          this.newNodeShadow.y = node!.display.y;
+          this.newNodeShadow.width = document.getElementById('node-' + node!.key)!.clientWidth + 5;
+          this.newNodeShadow.height = document.getElementById('node-' + node!.key)!.clientHeight + 5;
+          this.newNodeShadow.isOverNode = true;
+        }
+      } else {
+        this.movingNode.node.display.x = event.clientX - this.movingNode.offset.x;
+        this.movingNode.node.display.y = event.clientY - this.movingNode.offset.y;
+      }
     },
-    mouseUp() {
+    square(x: number): number {
+      return x * x;
+    },
+    getClosestNodeExceptMovingNode(x: number, y: number): { node: GraphNode, distanceSquared: number } | null {
+      if (this.nodes.length <= 0) return null;
+      return this.nodes
+          .filter((node: GraphNode) => node.key !== this.movingNode?.node.key)
+          .map((node: GraphNode) => {
+            let distanceSquared = this.square(node.display.x - x) + this.square(node.display.y - y);
+            return {node, distanceSquared};
+          })
+          .reduce((prev: { node: GraphNode, distanceSquared: number }, curr: {
+            node: GraphNode,
+            distanceSquared: number
+          }) => prev.distanceSquared < curr.distanceSquared ? prev : curr);
+    },
+    distanceSquaredBetweenNodes(node: GraphNode, coordTo: Coord): number {
+      return this.square(node.display.x - coordTo.x) + this.square(node.display.y - coordTo.y);
+    },
+    mouseUp(e: MouseEvent) {
       if (this.movingNode == null) return;
-      let htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;
-      htmlNode.classList.remove('dragging');
+      if (this.linkNodesMode) {
+        let x = e.clientX;
+        let y = e.clientY;
+        let nodeAndDistance = this.getClosestNodeExceptMovingNode(x, y);
+        if (nodeAndDistance == null) return;
+        let {node, distanceSquared} = nodeAndDistance;
+        if (distanceSquared <= this.square(this.maxLinkDistance)) {
+          this.movingNode.node.linkOrDestroyLinkTo(node, Infinity);
+        } else if // don't create nodes too close
+        (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
+          // create new node
+          let newNode = new GraphNode("New node");
+          newNode.display.x = x;
+          newNode.display.y = y;
+          this.movingNode.node.linkTo(newNode, Infinity);
+        }
+      } else {
+        let htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;
+        htmlNode.classList.remove('dragging');
+      }
       this.movingNode = null;
+      this.movingLine = null;
+      this.newNodeShadow = null;
     },
     buttonUpdatedName(event: Event, node: GraphNode) {
       let target = event.target as HTMLSpanElement;
@@ -156,12 +256,29 @@ export default defineComponent({
     },
     blurFocus() {
       (document.activeElement as HTMLElement)?.blur();
+    },
+    newNodeShadowStyle() {
+      let style = {
+        left: this.newNodeShadow?.x + 'px',
+        top: this.newNodeShadow?.y + 'px',
+        width: this.newNodeShadow?.width + 'px',
+        height: this.newNodeShadow?.height + 'px',
+        transition: undefined as string | undefined,
+      }
+      let now = Date.now();
+      if (this.newNodeShadow?.isOverNode) {
+        style.transition = 'all 0.4s ease-in-out';
+        this.lastTimeShadowOnShadow = now;
+      } else if (now - this.lastTimeShadowOnShadow <= 410) {
+        style.transition = 'all 0.4s ease-in-out';
+      }
+      return style;
     }
   },
   computed: {
     lines(): Line[] {
       return this.links.map(link => this.computeLine(link.node1.display, link.node2.display, link.base));
-    }
+    },
   }
 })
 </script>
@@ -170,6 +287,7 @@ export default defineComponent({
   <div ref="lines-container">
     <GraphLine v-for="line in lines" :key="line" :line="line"
                @update:weight="newWeight => updateLineWeight(line, newWeight)"/>
+    <GraphLine v-if="movingLine" :line="movingLine" noweight/>
   </div>
   <div ref="nodes-container">
     <GraphNodeButton v-for="node in nodes" :key="node.key" :id="'node-' + node.key" :node="node"
@@ -178,4 +296,19 @@ export default defineComponent({
                      @spanfocusout="e => e.target.innerText = node.name"
                      @keydown.enter.prevent="blurFocus"/>
   </div>
+  <div v-if="newNodeShadow != null" :style="newNodeShadowStyle()" class="node-shadow">
+  </div>
 </template>
+
+<style scoped lang="scss">
+.node-shadow {
+  position: absolute;
+  background-color: rgba(100%, 100%, 100%, 20%);
+  border-radius: 1000px;
+  border: none;
+  transform: translate(-50%, -50%);
+  padding: .4em .5em;
+  transition: all 0.4s ease-in-out, top 0s linear, left 0s linear;
+  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+</style>

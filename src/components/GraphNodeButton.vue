@@ -17,6 +17,10 @@ export default defineComponent({
     node: {
       type: Object as () => GraphNode,
       required: true
+    },
+    isRoot: {
+      type: Boolean,
+      default: false
     }
   },
   emits: {
@@ -39,6 +43,10 @@ export default defineComponent({
   transition: all 0.2s ease-in-out, top 0s linear, left 0s linear;
   cursor: grab;
   box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.4);
+
+  &:nth-child(1) {
+    border-radius: 3px;
+  }
 
   span {
     font-family: 'Bree Serif', serif;

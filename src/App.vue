@@ -5,7 +5,7 @@
         <img alt="Logo" class="mx-3" height="27" src="@/assets/logo.png" width="27">
         <span>Dijkstra</span>
       </div>
-      <LoadGraphButton class="mx-3" @onGraphLoaded="graph1 => graph = graph1"/>
+      <LoadGraphButton class="mx-3" @onGraphLoaded="graph1 => graph = graph1" size="sm"/>
       <div class="form-check mx-3">
         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" v-model="linkNodes">
         <label class="form-check-label" for="flexCheckChecked">
@@ -24,7 +24,7 @@
   <div v-else class="text-center">
     <h1 class="display-1 mt-5">Dijkstra</h1>
     <p class="lead">A simple Dijkstra's algorithm implementation with a nice interface</p>
-    <LoadGraphButton @onGraphLoaded="graph1 => graph = graph1" primary/>
+    <LoadGraphButton @onGraphLoaded="graph1 => graph = graph1" primary size="lg"/>
   </div>
 </template>
 

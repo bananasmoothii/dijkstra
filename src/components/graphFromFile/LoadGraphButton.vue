@@ -8,6 +8,10 @@ export default defineComponent({
     primary: {
       type: Boolean,
       default: false
+    },
+    size: {
+      type: String,
+      default: "md"
     }
   },
   emits: {
@@ -29,7 +33,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <button @click="loadGraph" :class="`btn btn-${primary ? 'primary' : 'secondary'} btn-sm`">
+  <button @click="loadGraph" :class="`btn btn-${primary ? 'primary' : 'secondary'} btn-${size}`">
     Load Graph
   </button>
 </template>

@@ -79,7 +79,6 @@ export default defineComponent({
         this.nodes = [];
         this.links = [];
         const nodesToAdd = [this.graph];
-        console.log(this.graph)
         while (nodesToAdd.length > 0) {
           const node1 = nodesToAdd.pop() as GraphNode;
           if (this.nodes.some(node => node.key === node1.key)) continue;
@@ -199,7 +198,7 @@ export default defineComponent({
       return x * x;
     },
     getClosestNodeExceptMovingNode(x: number, y: number): { node: GraphNode, distanceSquared: number } | null {
-      if (this.nodes.length <= 0) return null;
+      if (this.nodes.length <= 1) return null;
       return this.nodes
           .filter((node: GraphNode) => node.key !== this.movingNode?.node.key)
           .map((node: GraphNode) => {
@@ -220,14 +219,12 @@ export default defineComponent({
         let x = e.clientX;
         let y = e.clientY;
         let nodeAndDistance = this.getClosestNodeExceptMovingNode(x, y);
-        if (nodeAndDistance == null) return;
-        let {node, distanceSquared} = nodeAndDistance;
-        if (distanceSquared <= this.square(this.maxLinkDistance)) {
-          this.movingNode.node.linkOrDestroyLinkTo(node, Infinity);
+        if (nodeAndDistance && nodeAndDistance.distanceSquared <= this.square(this.maxLinkDistance)) {
+          this.movingNode.node.linkOrDestroyLinkTo(nodeAndDistance.node, Infinity);
         } else if // don't create nodes too close
         (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
           // create new node
-          let newNode = new GraphNode("New node");
+          let newNode = new GraphNode(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"][Math.floor(Math.random() * 10)]);
           newNode.display.x = x;
           newNode.display.y = y;
           this.movingNode.node.linkTo(newNode, Infinity);
@@ -267,10 +264,10 @@ export default defineComponent({
       }
       let now = Date.now();
       if (this.newNodeShadow?.isOverNode) {
-        style.transition = 'all 0.4s ease-in-out';
+        style.transition = 'all 0.3s ease-out';
         this.lastTimeShadowOnShadow = now;
       } else if (now - this.lastTimeShadowOnShadow <= 410) {
-        style.transition = 'all 0.4s ease-in-out';
+        style.transition = 'all 0.3s ease-out';
       }
       return style;
     }
@@ -308,7 +305,7 @@ export default defineComponent({
   border: none;
   transform: translate(-50%, -50%);
   padding: .4em .5em;
-  transition: all 0.4s ease-in-out, top 0s linear, left 0s linear;
+  transition: all 0.3s ease-in-out, top 0s linear, left 0s linear;
   box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.4);
 }
 </style>

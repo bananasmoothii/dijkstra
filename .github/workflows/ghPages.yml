@@ -17,9 +17,6 @@ jobs:
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: dist
 
   # Deploy job
   deploy:
@@ -39,15 +36,6 @@ jobs:
     # Specify runner + deployment step
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifacts
-          path: dist
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          source: dist

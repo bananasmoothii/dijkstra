@@ -6,21 +6,25 @@ jobs:
     # At a minimum this job should upload artifacts using actions/upload-pages-artifact
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Install dependencies
         run: npm install
-      - name: Build
-        run: npm run build
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: github-pages
-          path: github-pages
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
 
+      - name: Build app
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
@@ -31,3 +35,19 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source: dist

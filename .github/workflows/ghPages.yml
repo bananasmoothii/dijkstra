@@ -19,8 +19,9 @@ jobs:
         run: |
           tar \
             --dereference --hard-dereference \
-            -cvf "dist.tar" \
-            dist
+            --directory "dist/" \
+            -cvf "../dist.tar" \
+            .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3

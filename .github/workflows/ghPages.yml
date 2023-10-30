@@ -20,7 +20,7 @@ jobs:
           tar \
             --dereference --hard-dereference \
             --directory "dist/" \
-            -cvf "../dist.tar" \
+            -cvf "dist.tar" \
             .
 
       - name: Upload build artifacts
@@ -28,6 +28,7 @@ jobs:
         with:
           name: github-pages
           path: dist.tar
+          if-no-files-found: error
 
   # Deploy job
   deploy:

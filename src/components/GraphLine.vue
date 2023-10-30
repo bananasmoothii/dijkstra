@@ -1,8 +1,9 @@
 <template>
-  <div
-      :style="{left: line.center.x + 'px', top: line.center.y + 'px', width: line.length + 'px', transform: `rotate(${line.angle}rad)`, '--hue': line.hue}">
-    <p :style="{transform: `rotate(${-line.angle}rad) translate(.8em, -.8em)`}">{{ formattedWeight }}</p>
+  <div class="line"
+       :style="{left: line.center.x + 'px', top: line.center.y + 'px', width: line.length + 'px', transform: `rotate(${line.angle}rad)`, '--hue': line.hue}">
   </div>
+  <span :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
+        ref="span" @focusout="e => formattedWeight = e.target.innerText" contenteditable>{{ formattedWeight }}</span>
 </template>
 <script lang="ts">
 import {Line} from "@/components/NodeGroup.vue";
@@ -16,11 +17,27 @@ export default defineComponent({
       required: true
     }
   },
+  emits: {
+    'update:weight': (newWeight: number) => true,
+    'spanfocusout': (e: Event) => true,
+  },
   computed: {
-    formattedWeight(): string {
-      let weight = this.line.graphWeight;
-      if (weight == Infinity) return '∞';
-      return weight.toString();
+    formattedWeight: {
+      get(): string {
+        let weight = this.line.graphWeight;
+        if (weight == Infinity) return '∞';
+        return weight.toString();
+      },
+      set(value: string) {
+        if (value == '∞') value = 'Infinity';
+        let weight = parseFloat(value);
+        if (isNaN(weight)) {
+          let span = this.$refs.span as HTMLSpanElement;
+          span.innerText = this.formattedWeight;
+          return;
+        }
+        this.$emit('update:weight', weight);
+      }
     },
   },
 })
@@ -38,8 +55,25 @@ export default defineComponent({
   background-color: hsl(var(--hue), 88%, 50%);
 }
 
-p {
-  text-align: center;
-}
+span {
+  transform: translate(.8em, .8em);
+  position: absolute;
+  display: inline-block;
+  margin: 0 auto;
+  border: none;
+  background-color: transparent;
+  border-radius: 3px;
+  color: black;
+  padding: .1em .3em;
+  transition: all 0.2s ease-in-out;
 
+  &:hover {
+    box-shadow: black 0 0 1px 1px inset;
+  }
+
+  &:focus {
+    box-shadow: black 0 0 2px 2px inset;
+    outline: none;
+  }
+}
 </style>

@@ -99,7 +99,7 @@ export default defineComponent({
           y: event.clientY - node.display.y,
         }
       };
-      let htmlNode = document.getElementById('node-' + node.name) as HTMLElement;
+      let htmlNode = document.getElementById('node-' + node.key) as HTMLElement;
       htmlNode.classList.add('dragging');
     },
     mouseMove(event: MouseEvent) {
@@ -109,10 +109,20 @@ export default defineComponent({
     },
     mouseUp() {
       if (this.movingNode == null) return;
-      let htmlNode = document.getElementById('node-' + this.movingNode.node.name) as HTMLElement;
+      let htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;
       htmlNode.classList.remove('dragging');
       this.movingNode = null;
     },
+    buttonUpdatedName(event: Event, node: GraphNode) {
+      let target = event.target as HTMLSpanElement;
+      if (! target.innerText) return;
+      node.name = target.innerText;
+      for (let link of this.links) {
+        if (link.node1 == node || link.node2 == node) {
+          link.hue = node.display.hue;
+        }
+      }
+    }
   },
   computed: {
     lines(): Line[] {
@@ -124,10 +134,12 @@ export default defineComponent({
 
 <template>
   <div ref="lines-container">
-    <GraphLine class="line" v-for="line in lines" :key="line" :line="line"/>
+    <GraphLine v-for="line in lines" :key="line" :line="line"/>
   </div>
   <div ref="nodes-container">
-    <GraphNodeButton v-for="node in nodes" :key="node.name" :id="'node-' + node.name" :node="node"
-                     @mousedown="e => mouseDown(node, e)"/>
+    <GraphNodeButton v-for="node in nodes" :key="node.key" :id="'node-' + node.key" :node="node"
+                     @mousedown="e => mouseDown(node, e)"
+                     @update:name="e => buttonUpdatedName(e, node)"
+                     @spanfocusout="e => e.target.innerText = node.name"/>
   </div>
 </template>

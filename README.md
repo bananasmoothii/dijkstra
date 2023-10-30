@@ -1,4 +1,4 @@
-# dijkstra
+# [dijkstra](https://bananasmoothii.github.io/dijkstra/)
 
 ## Project setup
 ```

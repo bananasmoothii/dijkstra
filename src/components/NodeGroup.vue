@@ -39,9 +39,13 @@ export default defineComponent({
   components: {GraphLine, GraphNodeButton},
   props: {
     graph: {
-      type: Object as () => GraphNode | null,
+      type: Object as () => GraphNode,
       required: true
     },
+    linkNodesMode: {
+      type: Boolean,
+      default: false
+    }
   },
   data(): DataType {
     return {
@@ -60,29 +64,38 @@ export default defineComponent({
       handler() {
         this.nodes = [];
         this.links = [];
-        if (this.graph == null) return;
         const nodesToAdd = [this.graph];
+        const excludedNodesLines: GraphNode[] = [];
+        console.log(this.graph);
         while (nodesToAdd.length > 0) {
-          const node = nodesToAdd.pop() as GraphNode;
-          this.nodes.push(node);
-          for (const link of node.links) {
-            let node1 = link.node;
-            if (!this.nodes.includes(node1)) {
-              nodesToAdd.push(node1);
+          const node1 = nodesToAdd.pop() as GraphNode;
+          this.nodes.push(node1);
+          for (const link1 of node1.links) {
+            // adding node
+            let node2 = link1.node;
+            if (!this.nodes.includes(node2)) {
+              nodesToAdd.push(node2);
             }
+
+            // adding line between nodes, but not adding both lines because our graph is undirected
+            if (this.links.some(link => link.node1 == node2 && link.node2 == node1)) continue;
+            let link2: {node: GraphNode, linkWeight: number} | undefined = undefined;
+            for (let link2Test of node2.links) {
+              if (link2Test.node.key === node1.key) {
+                link2 = link2Test;
+                break;
+              }
+            }
+            if (link2 == undefined) throw new Error("Link not found, graph is not valid");
             this.links.push({
-              node1: node,
-              node2: node1,
+              node1,
+              node2,
               base: {
-                hue: node.display.hue,
-                graphWeight: link.linkWeight,
+                hue: node2.display.hue,
+                graphWeight: link1.linkWeight,
                 updateGraphWeight(newWeight: number) {
-                  link.linkWeight = newWeight;
-                  for (let link1 of node1.links) {
-                    if (link1.node.key === node.key) {
-                      link1.linkWeight = newWeight;
-                    }
-                  }
+                  link1.linkWeight = newWeight;
+                  if (link2 != undefined) link2.linkWeight = newWeight;
                 }
               }
             });
@@ -139,6 +152,7 @@ export default defineComponent({
     },
     updateLineWeight(line: Line, newWeight: number) {
       line.base.graphWeight = newWeight;
+      line.base.updateGraphWeight(newWeight);
     },
     blurFocus() {
       (document.activeElement as HTMLElement)?.blur();

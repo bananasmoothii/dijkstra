@@ -4,6 +4,12 @@ import {GraphNode} from "@/logic/node";
 
 export default defineComponent({
   name: "LoadGraphButton",
+  props: {
+    primary: {
+      type: Boolean,
+      default: false
+    }
+  },
   emits: {
     onGraphLoaded: (graph: GraphNode) => true
   },
@@ -23,7 +29,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <button @click="loadGraph" class="btn btn-secondary btn-sm">
+  <button @click="loadGraph" :class="`btn btn-${primary ? 'primary' : 'secondary'} btn-sm`">
     Load Graph
   </button>
 </template>

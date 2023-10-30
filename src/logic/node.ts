@@ -52,6 +52,10 @@ export class GraphNode {
             node,
             linkWeight: weight,
         });
+        node.links.push({
+            node: this,
+            linkWeight: weight,
+        });
     }
 
     public infiniteLinkTo(node: GraphNode) {

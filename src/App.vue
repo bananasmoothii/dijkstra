@@ -5,7 +5,13 @@
         <img alt="Logo" class="mx-3" height="27" src="@/assets/logo.png" width="27">
         <span>Dijkstra</span>
       </div>
-      <LoadGraphButton @onGraphLoaded="(graph1) => graph = graph1"/>
+      <LoadGraphButton class="mx-3" @onGraphLoaded="graph1 => graph = graph1"/>
+      <div class="form-check mx-3">
+        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" v-model="linkNodes">
+        <label class="form-check-label" for="flexCheckChecked">
+          Link nodes
+        </label>
+      </div>
       <div class="text-secondary ms-auto">
         Made by <a class="git-profile-link text-secondary" href="https://github.com/bananasmoothii">Bananasmoothii</a>
         <a href="https://github.com/bananasmoothii/dijkstra">
@@ -14,11 +20,16 @@
       </div>
     </div>
   </nav>
-  <NodeGroup :graph="graph"/>
+  <NodeGroup v-if="graph" :graph="graph" :link-nodes-mode="linkNodes"/>
+  <div v-else class="text-center">
+    <h1 class="display-1 mt-5">Dijkstra</h1>
+    <p class="lead">A simple Dijkstra's algorithm implementation with a nice interface</p>
+    <LoadGraphButton @onGraphLoaded="graph1 => graph = graph1" primary/>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import {defineComponent} from 'vue';
 import LoadGraphButton from "@/components/graphFromFile/LoadGraphButton.vue";
 import NodeGroup from "@/components/NodeGroup.vue";
 import {GraphNode} from "@/logic/node";
@@ -29,9 +40,10 @@ export default defineComponent({
     NodeGroup,
     LoadGraphButton
   },
-  data(): { graph: GraphNode | null } {
+  data(): { graph: GraphNode | null, linkNodes: boolean } {
     return {
-      graph: null
+      graph: null,
+      linkNodes: false,
     }
   },
 });

@@ -5,7 +5,7 @@
         top: line.center.y + 'px',
         width: line.length + 'px',
         height: lineHeight + 'px',
-        transform: `rotate(${line.angle}rad)`,
+        transform: `translateY(${-lineHeight / 2}px) rotate(${line.angle}rad)`,
         '--hue': line.base.hue,
   }">
   </div>
@@ -63,7 +63,7 @@ export default defineComponent({
 
 .line {
   position: absolute;
-  border-radius: 1px;
+  border-radius: 100px;
   padding: 0;
   margin: 0;
   line-height: 1px;

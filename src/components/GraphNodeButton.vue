@@ -10,8 +10,6 @@
 <script lang="ts">
 import {GraphNode} from "@/logic/node";
 import {defineComponent} from "vue";
-import gsap from "gsap";
-import GSAPTween from "gsap/gsap-core";
 
 export default defineComponent({
       name: 'GraphNodeButton',
@@ -100,10 +98,10 @@ export default defineComponent({
 
 @keyframes cool-selected {
   0% {
-    box-shadow: 0 0 0 0 hsla(var(--hue), 88%, 50%, 50%), 0 0 0 8px hsla(var(--hue), 88%, 50%, 33%), 0 0 0 16px hsla(var(--hue), 88%, 50%, 17%);
+    box-shadow: 0 0 0 0 hsla(var(--hue), 95%, 51%, 50%), 0 0 0 8px hsla(var(--hue), 95%, 51%, 33%), 0 0 0 16px hsla(var(--hue), 95%, 51%, 17%);
   }
   100% {
-    box-shadow: 0 0 0 8px hsla(var(--hue), 88%, 50%, 33%), 0 0 0 16px hsla(var(--hue), 88%, 50%, 17%), 0 0 0 24px hsla(var(--hue), 88%, 50%, 0%);
+    box-shadow: 0 0 0 8px hsla(var(--hue), 95%, 51%, 33%), 0 0 0 16px hsla(var(--hue), 95%, 51%, 17%), 0 0 0 24px hsla(var(--hue), 95%, 51%, 0%);
   }
 }
 </style>

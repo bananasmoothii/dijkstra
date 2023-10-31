@@ -21,10 +21,15 @@ type LinkSurrogate = {
     weight: number | string,
 }
 
+export type NodeAndPath = {
+    node: GraphNode,
+    weight: number,
+    path: GraphNode[],
+}
+
 export class GraphNode {
     _key: number;
     _name: string;
-    public weight = Infinity;
     public links: {
         node: GraphNode,
         linkWeight: number,
@@ -176,38 +181,43 @@ export class GraphNode {
         return graphNode;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public findShortestPaths() /*:{ [key: string]: { weight: number, path: GraphNode[] } }*/ {
 
-        function findAndRemoveMin(nodes: GraphNode[]): GraphNode {
-            let minNode: GraphNode | undefined = undefined;
-            let minNodeIndex = -1;
-            for (let i = 0; i < nodes.length; i++) {
-                const node = nodes[i];
+        function findAndRemoveMin(nodes: { [key: string]: NodeAndPath }): NodeAndPath{
+            let minNode: NodeAndPath | undefined = undefined;
+            for (const node of Object.values(nodes)) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 if (minNode == undefined || node.weight < minNode.weight) {
                     minNode = node;
-                    minNodeIndex = i;
+                    break;
                 }
             }
             if (minNode == undefined) throw new Error("No min node found");
-            nodes.splice(minNodeIndex, 1);
+            delete nodes[minNode.node.key];
             return minNode;
         }
 
-        const solutions: { weight: number, target: GraphNode }[] = [];
-        const remainingNodes = this.getGraphNodesAndLinks().nodes;
-        // reset node weights
-        for (const node of remainingNodes) {
-            if (node === this) node.weight = 0;
-            else node.weight = Infinity;
-        }
+        const solutions: { [key: string]: NodeAndPath } = {};
+        const graphNodes = this.getGraphNodesAndLinks().nodes;
+        const remainingNodes: { [key: string]: NodeAndPath } = Object.fromEntries(graphNodes
+            .map(node => [node.key, ({node, weight: node === this ? 0 : Infinity, path: [node]} as NodeAndPath)]));
 
-        while (remainingNodes.length > 0) {
+        while (Object.keys(remainingNodes).length > 0) {
             const minimalNode = findAndRemoveMin(remainingNodes);
-            solutions.push({weight: minimalNode.weight, target: minimalNode});
+            solutions[minimalNode.node.key] = minimalNode;
             const currentWeight = minimalNode.weight;
+            const currentPath = minimalNode.path;
 
-            for (const {node, linkWeight} of minimalNode.links) {
-                node.weight = Math.min(node.weight, currentWeight + linkWeight);
+            for (const {node, linkWeight} of minimalNode.node.links) {
+                const nodeAndPath = remainingNodes[node.key] || solutions[node.key];
+                const newWeight = currentWeight + linkWeight;
+
+                if (newWeight >= nodeAndPath.weight) continue;
+
+                nodeAndPath.weight = newWeight;
+                nodeAndPath.path = [...currentPath, node];
             }
         }
 

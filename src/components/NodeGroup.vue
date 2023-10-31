@@ -94,8 +94,7 @@ export default defineComponent({
   methods: {
     computeShortestPathsIfPossible() {
       if (!this.startNodeForComputingPaths) return;
-      console.log("shortest paths:", this.startNodeForComputingPaths.findShortestPaths()
-          .map(({weight, target}) => weight + " to " + target.name));
+      console.log("shortest paths:", this.startNodeForComputingPaths.findShortestPaths());
     },
     computeLine(start: Coord, end: Coord, base: LineBase): Line {
       // distance
@@ -292,6 +291,7 @@ export default defineComponent({
     <GraphLine v-if="movingLine" :line="movingLine" noweight/>
   </div>
   <div ref="nodes-container">
+    <!--suppress TypeScriptUnresolvedReference -->
     <GraphNodeButton v-for="node in nodes" :key="node.key" :id="'node-' + node.key" :node="node"
                      @mousedown="e => mouseDown(node, e)"
                      @update:name="e => buttonUpdatedName(e, node)"

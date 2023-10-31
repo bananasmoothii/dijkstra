@@ -191,7 +191,17 @@ export default defineComponent({
         } else if // don't create nodes too close
         (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
           // create new node
-          let newNode = new GraphNode(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"][Math.floor(Math.random() * 10)]);
+          let newNodeName = "";
+          const withNumberRegex = /^(.*)(\d+)$/;
+          let results = withNumberRegex.exec(this.movingNode.node.name);
+          if (results) {
+            let name = results[1];
+            let number = parseInt(results[2]);
+            newNodeName = name + (number + 1);
+          } else {
+            newNodeName = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"][Math.floor(Math.random() * 10)] + "1";
+          }
+          let newNode = new GraphNode(newNodeName);
           newNode.display.x = x;
           newNode.display.y = y;
           this.movingNode.node.linkTo(newNode, Infinity);

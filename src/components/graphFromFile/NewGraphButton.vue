@@ -19,9 +19,9 @@ export default defineComponent({
   },
   methods: {
     newGraph() {
-      let a = new GraphNode("A");
-      let b = new GraphNode("B");
-      let c = new GraphNode("C");
+      let a = new GraphNode("A1");
+      let b = new GraphNode("B1");
+      let c = new GraphNode("C1");
       a.linkTo(b, 1);
       b.linkTo(c, 1);
       c.linkTo(a, 1);

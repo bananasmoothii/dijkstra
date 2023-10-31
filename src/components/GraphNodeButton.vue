@@ -36,7 +36,7 @@ export default defineComponent({
 .node {
   position: absolute;
   border: none;
-  border-radius: 1000px;
+  border-radius: 2em;
   transform: translate(-50%, -50%);
   padding: .4em .5em;
   background-color: hsl(var(--hue), 88%, 50%);

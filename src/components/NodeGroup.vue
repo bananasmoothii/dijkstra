@@ -18,7 +18,7 @@ type DataType = {
     y: number,
     width: number,
     height: number,
-    isOverNode: boolean,
+    hoveringNode: GraphNode | null,
   } | null,
   lastTimeShadowOnShadow: number,
 }
@@ -141,25 +141,27 @@ export default defineComponent({
           y: 0,
           width: 0,
           height: 0,
-          isOverNode: false,
+          hoveringNode: null,
         };
         if (distanceSquared > this.square(this.maxLinkDistance)) {
           this.newNodeShadow.x = x;
           this.newNodeShadow.y = y;
-          this.newNodeShadow.width = 37;
+          this.newNodeShadow.width = 45;
           this.newNodeShadow.height = 37;
-          this.newNodeShadow.isOverNode = false;
+          this.newNodeShadow.hoveringNode = null;
         } else {
           this.newNodeShadow.x = node!.display.x;
           this.newNodeShadow.y = node!.display.y;
-          this.newNodeShadow.width = document.getElementById('node-' + node!.key)!.clientWidth + 5;
-          this.newNodeShadow.height = document.getElementById('node-' + node!.key)!.clientHeight + 5;
-          this.newNodeShadow.isOverNode = true;
+          this.newNodeShadow.width = document.getElementById('node-' + node!.key)!.clientWidth + 8;
+          this.newNodeShadow.height = document.getElementById('node-' + node!.key)!.clientHeight + 8;
+          this.newNodeShadow.hoveringNode = node;
         }
       } else {
         this.movingNode.node.display.x = event.clientX - this.movingNode.offset.x;
         this.movingNode.node.display.y = event.clientY - this.movingNode.offset.y;
       }
+      const htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;
+      htmlNode.focus({preventScroll: true});
     },
     square(x: number): number {
       return x * x;
@@ -238,10 +240,15 @@ export default defineComponent({
         width: this.newNodeShadow?.width + 'px',
         height: this.newNodeShadow?.height + 'px',
         transition: undefined as string | undefined,
+        borderRadius: '2em',
       }
       let now = Date.now();
-      if (this.newNodeShadow?.isOverNode) {
+      let hoveringNode = this.newNodeShadow?.hoveringNode;
+      if (hoveringNode != null) {
         style.transition = 'all 0.3s ease-out';
+        if (hoveringNode.key === this.graph.key) {
+          style.borderRadius = '3px'
+        }
         this.lastTimeShadowOnShadow = now;
       } else if (now - this.lastTimeShadowOnShadow <= 410) {
         style.transition = 'all 0.3s ease-out';
@@ -277,12 +284,11 @@ export default defineComponent({
 <style scoped lang="scss">
 .node-shadow {
   position: absolute;
-  background-color: rgba(100%, 100%, 100%, 20%);
-  border-radius: 1000px;
+  background-color: rgba(100%, 100%, 100%, 25%);
   border: none;
   transform: translate(-50%, -50%);
   padding: .4em .5em;
-  transition: all 0.3s ease-in-out, top 0s linear, left 0s linear;
+  transition: all 0.3s ease-out, top 0s linear, left 0s linear;
   box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.4);
 }
 </style>

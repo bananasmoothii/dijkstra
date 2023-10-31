@@ -52,7 +52,7 @@ export default defineComponent({
     },
     lineHeight(): number {
       if (this.line.base.graphWeight == Infinity || this.noweight) return 2;
-      const height = Math.log2(this.line.base.graphWeight);
+      const height = Math.sqrt(this.line.base.graphWeight / 10);
       if (height <= 2) return 2;
       return height;
     }

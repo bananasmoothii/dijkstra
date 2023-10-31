@@ -187,7 +187,7 @@ export default defineComponent({
         let y = e.clientY;
         let nodeAndDistance = this.getClosestNodeExceptMovingNode(x, y);
         if (nodeAndDistance && nodeAndDistance.distanceSquared <= this.square(this.maxLinkDistance)) {
-          this.movingNode.node.linkOrDestroyLinkTo(nodeAndDistance.node, Infinity);
+          this.movingNode.node.linkOrDestroyLinkTo(nodeAndDistance.node, 1);
         } else if // don't create nodes too close
         (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
           // create new node
@@ -204,7 +204,7 @@ export default defineComponent({
           let newNode = new GraphNode(newNodeName);
           newNode.display.x = x;
           newNode.display.y = y;
-          this.movingNode.node.linkTo(newNode, Infinity);
+          this.movingNode.node.linkTo(newNode, 1);
         }
       } else {
         let htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;

@@ -79,10 +79,8 @@ export class GraphNode {
     public linkOrDestroyLinkTo(node: GraphNode, weight: number) {
         if (this.links.some(link => link.node._key === node._key)) {
             this.destroyLinkTo(node);
-            console.log('destroyed link');
         } else {
             this.linkTo(node, weight);
-            console.log('created link');
         }
     }
 
@@ -171,7 +169,6 @@ export class GraphNode {
             }
             let weight: number | string = link.weight;
             if (weight === "inf") weight = Infinity;
-            console.log(typeof weight, weight);
             const weightNb = typeof weight === "number" ? weight : parseFloat(weight);
             node1.linkTo(node2, weightNb);
         }

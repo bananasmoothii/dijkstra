@@ -3,35 +3,37 @@
           :style="{left: node.display.x + 'px', top: node.display.y + 'px', '--hue': node.display.hue}">
 
     <span @input="e => $emit('update:name', e)"
-          @focusout="e => $emit('spanfocusout', e)" contenteditable>{{node.name}}</span>
+          @focusout="e => $emit('spanfocusout', e)" contenteditable>{{ node.name }}</span>
   </button>
 </template>
 
 <script lang="ts">
 import {GraphNode} from "@/logic/node";
 import {defineComponent} from "vue";
+import gsap from "gsap";
+import GSAPTween from "gsap/gsap-core";
 
 export default defineComponent({
-  name: 'GraphNodeButton',
-  props: {
-    node: {
-      type: Object as () => GraphNode,
-      required: true
-    },
-    isRoot: {
-      type: Boolean,
-      default: false
-    },
-    isStart: {
-      type: Boolean,
-      default: false
-    },
-  },
-  emits: {
-    'update:name': (e: Event) => true,
-    'spanfocusout': (e: Event) => true,
-  }
-}
+      name: 'GraphNodeButton',
+      props: {
+        node: {
+          type: Object as () => GraphNode,
+          required: true
+        },
+        isRoot: {
+          type: Boolean,
+          default: false
+        },
+        isStart: {
+          type: Boolean,
+          default: false
+        },
+      },
+      emits: {
+        'update:name': (e: Event) => true,
+        'spanfocusout': (e: Event) => true,
+      }
+    }
 )</script>
 
 <style scoped lang="scss">
@@ -84,8 +86,24 @@ export default defineComponent({
     cursor: grabbing;
   }
 
-  &.is-start{
-    outline: black 7px double !important;
+  &.is-start:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: inherit;
+    animation: cool-selected 2s infinite linear;
+  }
+}
+
+@keyframes cool-selected {
+  0% {
+    box-shadow: 0 0 0 0 hsla(var(--hue), 88%, 50%, 50%), 0 0 0 8px hsla(var(--hue), 88%, 50%, 33%), 0 0 0 16px hsla(var(--hue), 88%, 50%, 17%);
+  }
+  100% {
+    box-shadow: 0 0 0 8px hsla(var(--hue), 88%, 50%, 33%), 0 0 0 16px hsla(var(--hue), 88%, 50%, 17%), 0 0 0 24px hsla(var(--hue), 88%, 50%, 0%);
   }
 }
 </style>

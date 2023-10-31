@@ -78,7 +78,7 @@ export default defineComponent({
 }
 
 span {
-  transform: translate(.8em, .8em);
+  transform: translate(calc(-50% + .8em), calc(-50% - .8em));
   position: absolute;
   display: inline-block;
   margin: 0 auto;
@@ -88,6 +88,7 @@ span {
   color: black;
   padding: .1em .3em;
   transition: all 0.2s ease-in-out;
+  z-index: 10;
 
   &:hover {
     box-shadow: black 0 0 1px 1px inset;

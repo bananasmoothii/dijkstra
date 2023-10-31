@@ -247,7 +247,7 @@ export default defineComponent({
       if (hoveringNode != null) {
         style.transition = 'all 0.3s ease-out';
         if (hoveringNode.key === this.graph.key) {
-          style.borderRadius = '3px'
+          style.borderRadius = '5px'
         }
         this.lastTimeShadowOnShadow = now;
       } else if (now - this.lastTimeShadowOnShadow <= 410) {

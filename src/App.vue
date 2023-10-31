@@ -7,12 +7,15 @@
       </div>
       <LoadGraphButton class="mx-1" @onGraphLoaded="graph1 => graph = graph1" size="sm"/>
       <SaveGraphButton class="mx-1" size="sm" :graph="graph"/>
-      <div class="form-check mx-3">
+      <!--div class="form-check mx-3">
         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" v-model="linkNodes">
         <label class="form-check-label" for="flexCheckChecked">
           Link nodes
         </label>
-      </div>
+      </div-->
+      <button class="btn btn-outline-secondary btn-sm mx-3" @click="linkNodes = !linkNodes">
+        Mode: {{ linkNodes ? 'Link/create' : 'move' }} nodes
+      </button>
       <div class="text-secondary ms-auto">
         Made by <a class="git-profile-link text-secondary" href="https://github.com/bananasmoothii">Bananasmoothii</a>
         <a href="https://github.com/bananasmoothii/dijkstra">

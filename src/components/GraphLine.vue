@@ -1,5 +1,10 @@
 <template>
   <div class="line"
+       :class="{
+          'path-indicator': line.base.pathIndicator != undefined,
+          'to-left': line.base.pathIndicator === PathIndicator.ToNode1,
+          'to-right': line.base.pathIndicator === PathIndicator.ToNode2
+       }"
        :style="{
         left: line.center.x + 'px',
         top: line.center.y + 'px',
@@ -7,14 +12,16 @@
         height: lineHeight + 'px',
         transform: `translateY(${-lineHeight / 2}px) rotate(${line.angle}rad)`,
         '--start-hue': line.base.startHue,
-        '--end-hue': line.base.endHue,
+        '--end-hue': line.base.endHue ,
   }">
   </div>
   <span v-if="!noweight" :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
-        ref="span" @focusout="validateInput" @keydown.enter.prevent="validateInput" contenteditable>{{ formattedWeight }}</span>
+        ref="span" @focusout="validateInput" @keydown.enter.prevent="validateInput" contenteditable>
+    {{ formattedWeight }}
+  </span>
 </template>
 <script lang="ts">
-import {Line} from "@/components/NodeGroup.vue";
+import {Line, PathIndicator} from "@/components/NodeGroup.vue";
 import {defineComponent} from "vue";
 
 export default defineComponent({
@@ -33,6 +40,9 @@ export default defineComponent({
     'update:weight': (newWeight: number) => true,
   },
   computed: {
+    PathIndicator() {
+      return PathIndicator
+    },
     formattedWeight: {
       get(): string {
         let weight = this.line.base.graphWeight;
@@ -75,6 +85,10 @@ export default defineComponent({
   margin: 0;
   line-height: 1px;
   background: linear-gradient(in oklch shorter hue -90deg, hsl(var(--start-hue), 88%, 50%) 10%, hsl(var(--end-hue), 88%, 50%) 90%);
+
+  &.path-indicator {
+    box-shadow: 0 0 0 10px white;
+  }
 }
 
 span {

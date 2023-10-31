@@ -1,7 +1,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {defineComponent} from 'vue'
-import {GraphNode} from '@/logic/node'
+import {GraphNode, NodeAndPath} from '@/logic/node'
 import GraphNodeButton from "@/components/GraphNodeButton.vue";
 import GraphLine from "@/components/GraphLine.vue";
 
@@ -23,15 +23,23 @@ type DataType = {
   } | null,
   lastTimeShadowOnShadow: number,
   startNodeForComputingPaths: GraphNode | null,
+  shortestPaths?: { [key: string]: NodeAndPath },
+  lastHoveredNode?: GraphNode,
 }
 
 export type Coord = { x: number, y: number };
+
+export enum PathIndicator {
+  ToNode1,
+  ToNode2,
+}
 
 export type LineBase = {
   startHue: number,
   endHue: number,
   graphWeight: number,
   updateGraphWeight: (newWeight: number) => void,
+  pathIndicator?: PathIndicator,
 }
 
 export type Link = {
@@ -70,6 +78,8 @@ export default defineComponent({
       newNodeShadow: null,
       lastTimeShadowOnShadow: 0,
       startNodeForComputingPaths: null,
+      shortestPaths: undefined,
+      lastHoveredNode: undefined,
     }
   },
   mounted() {
@@ -88,13 +98,42 @@ export default defineComponent({
     },
     startNodeForComputingPaths(newVal: GraphNode | null, oldVal: GraphNode | null) {
       if (newVal === oldVal || !newVal) return;
+      this.lastHoveredNode = undefined;
       this.computeShortestPathsIfPossible();
+    },
+    lastHoveredNode(hovered: GraphNode | undefined) {
+      console.log("hovered", hovered)
+      if (! hovered || ! this.shortestPaths) return;
+      const shortestPath: GraphNode[] = this.shortestPaths[hovered.key]?.path;
+      if (! shortestPath) return;
+      console.log("shortestPath", shortestPath)
+      for (let link of this.links) {
+        const node1Index = shortestPath.indexOf(link.node1);
+        if (node1Index === -1) {
+          link.base.pathIndicator = undefined;
+          continue;
+        }
+        const node2Index = shortestPath.indexOf(link.node2);
+        if (node2Index === -1) {
+          link.base.pathIndicator = undefined;
+          continue;
+        }
+
+        let difference = node2Index - node1Index;
+        if (difference === 1) {
+          link.base.pathIndicator = PathIndicator.ToNode2;
+        } else if (difference === -1) {
+          link.base.pathIndicator = PathIndicator.ToNode1;
+        } else {
+          link.base.pathIndicator = undefined;
+        }
+      }
     }
   },
   methods: {
     computeShortestPathsIfPossible() {
       if (!this.startNodeForComputingPaths) return;
-      console.log("shortest paths:", this.startNodeForComputingPaths.findShortestPaths());
+      this.shortestPaths = this.startNodeForComputingPaths.findShortestPaths();
     },
     computeLine(start: Coord, end: Coord, base: LineBase): Line {
       // distance
@@ -297,6 +336,7 @@ export default defineComponent({
                      @update:name="e => buttonUpdatedName(e, node)"
                      @spanfocusout="e => e.target.innerText = node.name"
                      @keydown.enter.prevent="blurFocus"
+                     @mouseover="() => lastHoveredNode = node"
                      :isStart="node.key === startNodeForComputingPaths?.key"/>
   </div>
   <div v-if="newNodeShadow != null" :style="newNodeShadowStyle()" class="node-shadow">

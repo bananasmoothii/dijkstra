@@ -182,7 +182,7 @@ export class GraphNode {
     }
 
     // noinspection JSUnusedGlobalSymbols
-    public findShortestPaths() /*:{ [key: string]: { weight: number, path: GraphNode[] } }*/ {
+    public findShortestPaths():{ [key: string]: NodeAndPath } {
 
         function findAndRemoveMin(nodes: { [key: string]: NodeAndPath }): NodeAndPath{
             let minNode: NodeAndPath | undefined = undefined;
@@ -191,7 +191,6 @@ export class GraphNode {
                 // @ts-ignore
                 if (minNode == undefined || node.weight < minNode.weight) {
                     minNode = node;
-                    break;
                 }
             }
             if (minNode == undefined) throw new Error("No min node found");

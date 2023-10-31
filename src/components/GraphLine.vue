@@ -75,7 +75,7 @@ export default defineComponent({
   padding: 0;
   margin: 0;
   line-height: 1px;
-  background: linear-gradient(in oklch -90deg, hsl(var(--start-hue), 88%, 50%), hsl(var(--end-hue), 88%, 50%));
+  background: linear-gradient(in oklch shorter hue -90deg, hsl(var(--start-hue), 88%, 50%) 10%, hsl(var(--end-hue), 88%, 50%) 90%);
 }
 
 span {

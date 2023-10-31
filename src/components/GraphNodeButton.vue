@@ -1,5 +1,5 @@
 <template>
-  <button class="node"
+  <button class="node" :class="{'is-start': isStart}"
           :style="{left: node.display.x + 'px', top: node.display.y + 'px', '--hue': node.display.hue}">
 
     <span @input="e => $emit('update:name', e)"
@@ -21,7 +21,11 @@ export default defineComponent({
     isRoot: {
       type: Boolean,
       default: false
-    }
+    },
+    isStart: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: {
     'update:name': (e: Event) => true,
@@ -78,6 +82,10 @@ export default defineComponent({
     box-shadow: 12px 12px 10px 3px rgba(0, 0, 0, 0.4);
     transform: translate(calc(-50% - 10px), calc(-50% - 10px));
     cursor: grabbing;
+  }
+
+  &.is-start{
+    outline: black 7px double !important;
   }
 }
 </style>

@@ -35,7 +35,6 @@ export default defineComponent({
   computed: {
     formattedWeight: {
       get(): string {
-        console.log(this.line.base);
         let weight = this.line.base.graphWeight;
         if (weight == Infinity) return '∞';
         return weight.toString();

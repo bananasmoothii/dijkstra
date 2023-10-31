@@ -1,4 +1,5 @@
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {defineComponent} from 'vue'
 import {GraphNode} from '@/logic/node'
 import GraphNodeButton from "@/components/GraphNodeButton.vue";
@@ -21,6 +22,7 @@ type DataType = {
     hoveringNode: GraphNode | null,
   } | null,
   lastTimeShadowOnShadow: number,
+  startNodeKeyForComputingPaths: number,
 }
 
 export type Coord = { x: number, y: number };
@@ -67,6 +69,7 @@ export default defineComponent({
       maxLinkDistance: 60,
       newNodeShadow: null,
       lastTimeShadowOnShadow: 0,
+      startNodeKeyForComputingPaths: NaN,
     }
   },
   mounted() {
@@ -99,6 +102,7 @@ export default defineComponent({
       return {center, length, angle, base};
     },
     mouseDown(node: GraphNode, event: MouseEvent) {
+      this.startNodeKeyForComputingPaths = node.key;
       if (this.linkNodesMode) {
         this.movingNode = {
           node,
@@ -279,7 +283,8 @@ export default defineComponent({
                      @mousedown="e => mouseDown(node, e)"
                      @update:name="e => buttonUpdatedName(e, node)"
                      @spanfocusout="e => e.target.innerText = node.name"
-                     @keydown.enter.prevent="blurFocus"/>
+                     @keydown.enter.prevent="blurFocus"
+                     :isStart="node.key === startNodeKeyForComputingPaths"/>
   </div>
   <div v-if="newNodeShadow != null" :style="newNodeShadowStyle()" class="node-shadow">
   </div>

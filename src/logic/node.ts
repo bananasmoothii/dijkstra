@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {Link} from "@/components/NodeGroup.vue";
 
 const hues = [
@@ -175,5 +176,39 @@ export class GraphNode {
             node1.linkTo(node2, weightNb);
         }
         return graphNode;
+    }
+
+    public findShortestPaths() /*:{ [key: string]: { weight: number, path: GraphNode[] } }*/ {
+
+        function findAndRemoveMin(nodes: GraphNode[]): GraphNode {
+            let minNode: GraphNode | undefined = undefined;
+            let minNodeIndex = -1;
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                if (minNode == undefined || node.weight < minNode.weight) {
+                    minNode = node;
+                    minNodeIndex = i;
+                }
+            }
+            if (minNode == undefined) throw new Error("No min node found");
+            nodes.splice(minNodeIndex, 1);
+            return minNode;
+        }
+
+        const solutions: { weight: number, target: GraphNode }[] = [];
+        const remainingNodes = this.getGraphNodesAndLinks().nodes;
+        remainingNodes.find(n => n.key === this.key)!.weight = 0;
+
+        while (remainingNodes.length > 0) {
+            const minimalNode = findAndRemoveMin(remainingNodes);
+            solutions.push({weight: minimalNode.weight, target: minimalNode});
+            const currentWeight = minimalNode.weight;
+
+            for (const {node, linkWeight} of minimalNode.links) {
+                node.weight = Math.min(node.weight, currentWeight + linkWeight);
+            }
+        }
+
+        return solutions;
     }
 }

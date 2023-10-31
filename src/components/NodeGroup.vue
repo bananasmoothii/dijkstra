@@ -22,7 +22,7 @@ type DataType = {
     hoveringNode: GraphNode | null,
   } | null,
   lastTimeShadowOnShadow: number,
-  startNodeKeyForComputingPaths: number,
+  startNodeForComputingPaths: GraphNode | null,
 }
 
 export type Coord = { x: number, y: number };
@@ -69,7 +69,7 @@ export default defineComponent({
       maxLinkDistance: 60,
       newNodeShadow: null,
       lastTimeShadowOnShadow: 0,
-      startNodeKeyForComputingPaths: NaN,
+      startNodeForComputingPaths: null,
     }
   },
   mounted() {
@@ -85,9 +85,18 @@ export default defineComponent({
         this.links = links;
       },
       deep: true,
+    },
+    startNodeForComputingPaths(newVal: GraphNode | null, oldVal: GraphNode | null) {
+      if (newVal === oldVal || !newVal) return;
+      this.computeShortestPathsIfPossible();
     }
   },
   methods: {
+    computeShortestPathsIfPossible() {
+      if (!this.startNodeForComputingPaths) return;
+      console.log("shortest paths:", this.startNodeForComputingPaths.findShortestPaths()
+          .map(({weight, target}) => weight + " to " + target.name));
+    },
     computeLine(start: Coord, end: Coord, base: LineBase): Line {
       // distance
       const length = Math.sqrt(((end.x - start.x) * (end.x - start.x)) + ((end.y - start.y) * (end.y - start.y)));
@@ -102,7 +111,6 @@ export default defineComponent({
       return {center, length, angle, base};
     },
     mouseDown(node: GraphNode, event: MouseEvent) {
-      this.startNodeKeyForComputingPaths = node.key;
       if (this.linkNodesMode) {
         this.movingNode = {
           node,
@@ -196,6 +204,7 @@ export default defineComponent({
         let nodeAndDistance = this.getClosestNodeExceptMovingNode(x, y);
         if (nodeAndDistance && nodeAndDistance.distanceSquared <= this.square(this.maxLinkDistance)) {
           this.movingNode.node.linkOrDestroyLinkTo(nodeAndDistance.node, 1);
+          this.computeShortestPathsIfPossible();
         } else if // don't create nodes too close
         (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
           // create new node
@@ -213,11 +222,13 @@ export default defineComponent({
           newNode.display.x = x;
           newNode.display.y = y;
           this.movingNode.node.linkTo(newNode, 1);
+          this.computeShortestPathsIfPossible();
         }
       } else {
         let htmlNode = document.getElementById('node-' + this.movingNode.node.key) as HTMLElement;
         htmlNode.classList.remove('dragging');
       }
+      this.startNodeForComputingPaths = this.movingNode.node;
       this.movingNode = null;
       this.movingLine = null;
       this.newNodeShadow = null;
@@ -237,6 +248,8 @@ export default defineComponent({
     updateLineWeight(line: Line, newWeight: number) {
       line.base.graphWeight = newWeight;
       line.base.updateGraphWeight(newWeight);
+
+      this.computeShortestPathsIfPossible();
     },
     blurFocus() {
       (document.activeElement as HTMLElement)?.blur();
@@ -284,7 +297,7 @@ export default defineComponent({
                      @update:name="e => buttonUpdatedName(e, node)"
                      @spanfocusout="e => e.target.innerText = node.name"
                      @keydown.enter.prevent="blurFocus"
-                     :isStart="node.key === startNodeKeyForComputingPaths"/>
+                     :isStart="node.key === startNodeForComputingPaths?.key"/>
   </div>
   <div v-if="newNodeShadow != null" :style="newNodeShadowStyle()" class="node-shadow">
   </div>

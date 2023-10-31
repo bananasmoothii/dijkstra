@@ -24,7 +24,7 @@ type LinkSurrogate = {
 export class GraphNode {
     _key: number;
     _name: string;
-    public weight: number = Number.MAX_VALUE;
+    public weight = Infinity;
     public links: {
         node: GraphNode,
         linkWeight: number,
@@ -127,6 +127,7 @@ export class GraphNode {
 
     public graphToString(): string | null {
         const {nodes, links} = this.getGraphNodesAndLinks();
+
         const nodeNames = nodes.map(n => n.name);
         if (nodeNames.length !== new Set(nodeNames).size) {
             alert("Duplicate node names, please fix before saving");
@@ -194,7 +195,11 @@ export class GraphNode {
 
         const solutions: { weight: number, target: GraphNode }[] = [];
         const remainingNodes = this.getGraphNodesAndLinks().nodes;
-        remainingNodes.find(n => n.key === this.key)!.weight = 0;
+        // reset node weights
+        for (const node of remainingNodes) {
+            if (node === this) node.weight = 0;
+            else node.weight = Infinity;
+        }
 
         while (remainingNodes.length > 0) {
             const minimalNode = findAndRemoveMin(remainingNodes);

@@ -23,15 +23,15 @@ type DataType = {
   lastTimeShadowOnShadow: number,
 }
 
-type Coord = { x: number, y: number };
+export type Coord = { x: number, y: number };
 
-type LineBase = {
+export type LineBase = {
   hue: number,
   graphWeight: number,
   updateGraphWeight: (newWeight: number) => void,
 }
 
-type Link = {
+export type Link = {
   node1: GraphNode,
   node2: GraphNode,
   base: LineBase
@@ -76,42 +76,9 @@ export default defineComponent({
     graph: {
       immediate: true,
       handler() {
-        this.nodes = [];
-        this.links = [];
-        const nodesToAdd = [this.graph];
-        while (nodesToAdd.length > 0) {
-          const node1 = nodesToAdd.pop() as GraphNode;
-          if (this.nodes.some(node => node.key === node1.key)) continue;
-          this.nodes.push(node1);
-          for (const link1 of node1.links) {
-            // adding node
-            let node2 = link1.node;
-            nodesToAdd.push(node2);
-
-            // adding line between nodes, but not adding both lines because our graph is undirected
-            if (this.links.some(link => link.node1 == node2 && link.node2 == node1)) continue;
-            let link2: { node: GraphNode, linkWeight: number } | undefined = undefined;
-            for (let link2Test of node2.links) {
-              if (link2Test.node.key === node1.key) {
-                link2 = link2Test;
-                break;
-              }
-            }
-            if (link2 == undefined) throw new Error("Link not found, graph is not valid");
-            this.links.push({
-              node1,
-              node2,
-              base: {
-                hue: node2.display.hue,
-                graphWeight: link1.linkWeight,
-                updateGraphWeight(newWeight: number) {
-                  link1.linkWeight = newWeight;
-                  if (link2 != undefined) link2.linkWeight = newWeight;
-                }
-              }
-            });
-          }
-        }
+        let {nodes, links} = this.graph.getGraphNodesAndLinks();
+        this.nodes = nodes;
+        this.links = links;
       },
       deep: true,
     }
@@ -179,7 +146,7 @@ export default defineComponent({
         if (distanceSquared > this.square(this.maxLinkDistance)) {
           this.newNodeShadow.x = x;
           this.newNodeShadow.y = y;
-          this.newNodeShadow.width = 97;
+          this.newNodeShadow.width = 37;
           this.newNodeShadow.height = 37;
           this.newNodeShadow.isOverNode = false;
         } else {

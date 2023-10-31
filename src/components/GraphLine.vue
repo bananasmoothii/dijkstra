@@ -34,6 +34,7 @@ export default defineComponent({
   computed: {
     formattedWeight: {
       get(): string {
+        console.log(this.line.base);
         let weight = this.line.base.graphWeight;
         if (weight == Infinity) return '∞';
         return weight.toString();
@@ -51,7 +52,9 @@ export default defineComponent({
     },
     lineHeight(): number {
       if (this.line.base.graphWeight == Infinity || this.noweight) return 2;
-      return Math.log2(this.line.base.graphWeight);
+      const height = Math.log2(this.line.base.graphWeight);
+      if (height <= 2) return 2;
+      return height;
     }
   },
   methods: {

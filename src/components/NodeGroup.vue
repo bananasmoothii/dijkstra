@@ -4,7 +4,6 @@ import {defineComponent} from 'vue'
 import {GraphNode} from '@/logic/node'
 import GraphNodeButton from "@/components/GraphNodeButton.vue";
 import GraphLine from "@/components/GraphLine.vue";
-import gsap from 'gsap';
 
 type DataType = {
   links: Link[],

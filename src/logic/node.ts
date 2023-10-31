@@ -85,10 +85,6 @@ export class GraphNode {
         }
     }
 
-    public infiniteLinkTo(node: GraphNode) {
-        this.linkTo(node, Infinity);
-    }
-
     public getGraphNodesAndLinks(): { nodes: GraphNode[], links: Link[] } {
         const nodes: GraphNode[] = [];
         const links: Link[] = [];
@@ -116,7 +112,8 @@ export class GraphNode {
                     node1,
                     node2,
                     base: {
-                        hue: node2.display.hue,
+                        startHue: node1.display.hue,
+                        endHue: node2.display.hue,
                         graphWeight: link1.linkWeight,
                         updateGraphWeight(newWeight: number) {
                             link1.linkWeight = newWeight;

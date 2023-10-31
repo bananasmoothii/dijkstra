@@ -6,7 +6,8 @@
         width: line.length + 'px',
         height: lineHeight + 'px',
         transform: `translateY(${-lineHeight / 2}px) rotate(${line.angle}rad)`,
-        '--hue': line.base.hue,
+        '--start-hue': line.base.startHue,
+        '--end-hue': line.base.endHue,
   }">
   </div>
   <span v-if="!noweight" :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
@@ -74,7 +75,7 @@ export default defineComponent({
   padding: 0;
   margin: 0;
   line-height: 1px;
-  background-color: hsl(var(--hue), 88%, 50%);
+  background: linear-gradient(in oklch -90deg, hsl(var(--start-hue), 88%, 50%), hsl(var(--end-hue), 88%, 50%));
 }
 
 span {

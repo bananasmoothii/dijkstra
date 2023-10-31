@@ -26,7 +26,8 @@ type DataType = {
 export type Coord = { x: number, y: number };
 
 export type LineBase = {
-  hue: number,
+  startHue: number,
+  endHue: number,
   graphWeight: number,
   updateGraphWeight: (newWeight: number) => void,
 }
@@ -110,7 +111,8 @@ export default defineComponent({
           x: event.clientX,
           y: event.clientY
         }, {
-          hue: node.display.hue,
+          startHue: node.display.hue,
+          endHue: node.display.hue,
           graphWeight: 1,
           updateGraphWeight: () => {
             throw new Error("Cannot update weight of a line that doesn't exist");
@@ -221,8 +223,10 @@ export default defineComponent({
       if (!target.innerText.trim()) return;
       node.name = target.innerText.trim();
       for (let link of this.links) {
-        if (link.node1 == node || link.node2 == node) {
-          link.base.hue = node.display.hue;
+        if (link.node1 == node) {
+          link.base.startHue = node.display.hue;
+        } else if (link.node2 == node) {
+          link.base.endHue = node.display.hue;
         }
       }
     },

@@ -10,7 +10,11 @@
         '--start-hue': line.base.startHue,
         '--end-hue': line.base.endHue,
   }">
-    <div v-if="line.base.path" class="line-dot" :class="{...classes, 'animate': animate}" v-show="animate">
+    <div v-if="line.base.path" class="line-dot" :class="{...classes, animate: this.animate}" v-show="animate">
+    </div>
+    <div v-if="line.base.path" class="dot-boom small" :class="{...classes, animate: this.animateBoom}">
+    </div>
+    <div v-if="line.base.path" class="dot-boom big" :class="{...classes, animate: this.animateBoom}">
     </div>
   </div>
   <span v-if="!noweight" :style="{left: line.center.x + line.length / 2 + 'px', top: line.center.y + 'px'}"
@@ -21,7 +25,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {Line, PathIndicator} from "@/components/NodeGroup.vue";
-import {defineComponent} from "vue";
+import {defineComponent, nextTick} from "vue";
 
 export default defineComponent({
   name: 'GraphLine',
@@ -39,6 +43,7 @@ export default defineComponent({
     return {
       timeouts: [] as number[],
       animate: false,
+      animateBoom: false,
     }
   },
   emits: {
@@ -55,20 +60,18 @@ export default defineComponent({
         }
         this.timeouts = [];
         if (path !== undefined) {
-          // eslint-disable-next-line no-inner-declarations
-          const animateF = () => {
-            this.animate = true;
-            this.timeouts.push(setTimeout(() => {
-              this.animate = false;
-              this.timeouts.push(setTimeout(() => {
-                animateF();
-              }, Math.min(500 * (path!.chainLength - 1), 1100)));
-            }, 500));
-          }
           this.timeouts.push(setTimeout(() => {
-            animateF();
-          }, 500 * path!.elementInChain));
+            this.animations();
+          }, 750 * path!.elementInChain));
         }
+      }
+    },
+    animate(current, previous) {
+      if (current && !previous) {
+        this.animateBoom = false;
+        setTimeout(() => {
+          this.animateBoom = true;
+        }, 50);
       }
     }
   },
@@ -79,7 +82,7 @@ export default defineComponent({
       return {
         'path-indicator': true,
         'to-left': path.indicator === PathIndicator.ToNode2,
-        'to-right': path.indicator === PathIndicator.ToNode1
+        'to-right': path.indicator === PathIndicator.ToNode1,
       }
     },
     formattedWeight: {
@@ -111,6 +114,16 @@ export default defineComponent({
       this.formattedWeight = (e.target as HTMLSpanElement).innerText;
       (document.activeElement as HTMLElement)?.blur();
     },
+    animations() {
+      this.animate = true;
+      this.timeouts.push(setTimeout(() => {
+        this.animate = false;
+        if (this.line.base.path === undefined) return;
+        this.timeouts.push(setTimeout(() => {
+          this.animations();
+        }, Math.min(750 * (this.line.base.path.chainLength - 1), 1100)));
+      }, 750));
+    }
   }
 })
 </script>
@@ -139,9 +152,9 @@ export default defineComponent({
   height: 14px;
   background-color: hsl(200, 88%, 50%);
   animation-timing-function: cubic-bezier(0.59, 0.26, 0.31, 0.99);
-  animation-iteration-count: infinite;
-  animation-duration: 500ms;
-  box-shadow: 0 0 5px 3px #0002 inset;// , 0 0 0 8px white;
+  animation-iteration-count: 1;
+  animation-duration: 750ms;
+  box-shadow: 0 0 5px 3px #0002 inset; // , 0 0 0 8px white;
 
   &.animate {
     &.to-left {
@@ -179,6 +192,50 @@ export default defineComponent({
   }
   100% {
     left: 100%;
+  }
+}
+
+.dot-boom {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 1000px;
+  width: 0;
+  height: 0;
+  background-color: transparent;
+  outline: #fff solid 5px;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-duration: 1s;
+  animation-delay: 100ms;
+
+  &.animate {
+    animation-name: dot-boom;
+  }
+
+  &.to-left {
+    left: 0;
+  }
+
+  &.to-right {
+    left: 100%;
+  }
+
+  &.big {
+    animation-delay: 200ms;
+  }
+}
+
+@keyframes dot-boom {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 100px;
+    height: 100px;
+    opacity: 0.5;
+    outline-width: 0;
   }
 }
 

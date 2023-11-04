@@ -154,7 +154,7 @@ export default defineComponent({
   animation-timing-function: cubic-bezier(0.59, 0.26, 0.31, 0.99);
   animation-iteration-count: 1;
   animation-duration: 750ms;
-  box-shadow: 0 0 5px 3px #0002 inset; // , 0 0 0 8px white;
+  box-shadow: 0 0 3px 3px #0004 inset; // , 0 0 0 8px white;
 
   &.animate {
     &.to-left {
@@ -164,6 +164,34 @@ export default defineComponent({
     &.to-right {
       animation-name: dot-whoosh-to-right;
     }
+  }
+
+  // eyes
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    border-radius: 100px;
+    width: 2px;
+    height: 2px;
+    background-color: black;
+    outline: white 2.5px solid;
+  }
+
+  &::before {
+    transform: translateY(calc(3px - 50%));
+  }
+
+  &::after {
+    transform: translateY(calc(-3px - 50%));
+  }
+
+  &.to-left::before, &.to-left::after {
+    left: 6px;
+  }
+
+  &.to-right::before, &.to-right::after {
+    right: 6px;
   }
 }
 

@@ -38,6 +38,7 @@ export default defineComponent({
 @import "@/scss/custom";
 
 .node {
+  z-index: 10;
   position: absolute;
   border: none;
   border-radius: 2em;

@@ -39,7 +39,12 @@ export type LineBase = {
   endHue: number,
   graphWeight: number,
   updateGraphWeight: (newWeight: number) => void,
-  pathIndicator?: PathIndicator,
+  path?: {
+    elementInChain: number,
+    chainLength: number,
+    indicator: PathIndicator,
+    currentlyAnimating: boolean,
+  },
 }
 
 export type Link = {
@@ -102,7 +107,6 @@ export default defineComponent({
       this.computeShortestPathsIfPossible();
     },
     lastHoveredNode(hovered: GraphNode | undefined) {
-      console.log("hovered", hovered)
       if (! hovered || ! this.shortestPaths) return;
       const shortestPath: GraphNode[] = this.shortestPaths[hovered.key]?.path;
       if (! shortestPath) return;
@@ -110,23 +114,27 @@ export default defineComponent({
       for (let link of this.links) {
         const node1Index = shortestPath.indexOf(link.node1);
         if (node1Index === -1) {
-          link.base.pathIndicator = undefined;
+          link.base.path = undefined;
           continue;
         }
         const node2Index = shortestPath.indexOf(link.node2);
         if (node2Index === -1) {
-          link.base.pathIndicator = undefined;
+          link.base.path = undefined;
           continue;
         }
 
         let difference = node2Index - node1Index;
-        if (difference === 1) {
-          link.base.pathIndicator = PathIndicator.ToNode2;
-        } else if (difference === -1) {
-          link.base.pathIndicator = PathIndicator.ToNode1;
-        } else {
-          link.base.pathIndicator = undefined;
+        if (difference !== 1 && difference !== -1) {
+          link.base.path = undefined;
+          continue;
         }
+
+        link.base.path = {
+          elementInChain: difference === 1 ? node1Index : node2Index,
+          chainLength: shortestPath.length,
+          indicator: difference === 1 ? PathIndicator.ToNode2 : PathIndicator.ToNode1,
+          currentlyAnimating: false,
+        };
       }
     }
   },

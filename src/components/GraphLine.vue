@@ -62,7 +62,7 @@ export default defineComponent({
         if (path !== undefined) {
           this.timeouts.push(setTimeout(() => {
             this.animations();
-          }, 750 * path!.elementInChain));
+          }, 1000 * path!.elementInChain));
         }
       }
     },
@@ -115,14 +115,14 @@ export default defineComponent({
       (document.activeElement as HTMLElement)?.blur();
     },
     animations() {
-      this.animate = true;
+      this.animate = false;
       this.timeouts.push(setTimeout(() => {
-        this.animate = false;
+        this.animate = true;
         if (this.line.base.path === undefined) return;
         this.timeouts.push(setTimeout(() => {
           this.animations();
-        }, Math.min(750 * (this.line.base.path.chainLength - 1), 1100)));
-      }, 750));
+        }, Math.min(1000 * (this.line.base.path.chainLength - 1), 2300)));
+      }, 30));
     }
   }
 })
@@ -146,15 +146,15 @@ export default defineComponent({
 .line-dot {
   position: absolute;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(0, -50%);
   border-radius: 100px;
   width: 14px;
   height: 14px;
   background-color: hsl(200, 88%, 50%);
-  animation-timing-function: cubic-bezier(0.59, 0.26, 0.31, 0.99);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.32, 0.94);
   animation-iteration-count: 1;
-  animation-duration: 750ms;
-  box-shadow: 0 0 3px 3px #0004 inset; // , 0 0 0 8px white;
+  animation-duration: 1.4s;
+  box-shadow: 0 0 3px 3px #0004 inset;
 
   &.animate {
     &.to-left {
@@ -199,10 +199,17 @@ export default defineComponent({
   0% {
     left: 100%;
   }
-  60% {
-    width: 30%;
+  10% {
+    width: 14px;
   }
-  78% {
+  45% {
+    width: min(65px, 30%);
+  }
+  50% {
+    width: min(65px, 30%);
+  }
+  95% {
+    width: 14px;
   }
   100% {
     left: 0;
@@ -213,10 +220,17 @@ export default defineComponent({
   0% {
     left: 0;
   }
-  60% {
-    width: 30%;
+  10% {
+    width: 14px;
   }
-  78% {
+  45% {
+    width: min(65px, 30%);
+  }
+  50% {
+    width: min(65px, 30%);
+  }
+  95% {
+    width: 14px;
   }
   100% {
     left: 100%;
@@ -235,7 +249,7 @@ export default defineComponent({
   animation-timing-function: ease-out;
   animation-iteration-count: 1;
   animation-duration: 1s;
-  animation-delay: 100ms;
+  animation-delay: 600ms;
 
   &.animate {
     animation-name: dot-boom;
@@ -250,7 +264,7 @@ export default defineComponent({
   }
 
   &.big {
-    animation-delay: 200ms;
+    animation-delay: 710ms;
   }
 }
 

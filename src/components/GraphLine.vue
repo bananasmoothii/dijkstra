@@ -25,7 +25,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {Line, PathIndicator} from "@/components/NodeGroup.vue";
-import {defineComponent, nextTick} from "vue";
+import {defineComponent} from "vue";
 
 export default defineComponent({
   name: 'GraphLine',

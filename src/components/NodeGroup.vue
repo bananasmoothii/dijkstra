@@ -255,7 +255,7 @@ export default defineComponent({
         (this.distanceSquaredBetweenNodes(this.movingNode.node, {x, y}) > this.square(this.maxLinkDistance)) {
           // create new node
           let newNodeName = "";
-          const withNumberRegex = /^(.*)(\d+)$/;
+          const withNumberRegex = /^(.*?)(\d+)$/;
           let results = withNumberRegex.exec(this.movingNode.node.name);
           if (results) {
             let name = results[1];

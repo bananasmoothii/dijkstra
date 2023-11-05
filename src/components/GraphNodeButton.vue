@@ -87,6 +87,7 @@ export default defineComponent({
 
   &.is-start:before {
     content: '';
+    z-index: -10;
     position: absolute;
     top: 0;
     left: 0;

@@ -157,6 +157,7 @@ export default defineComponent({
       return {center, length, angle, base};
     },
     mouseDown(node: GraphNode, event: MouseEvent) {
+      this.lastHoveredNode = undefined;
       if (this.linkNodesMode) {
         this.movingNode = {
           node,

@@ -1,5 +1,7 @@
 # [Dijkstra (click to open)](https://bananasmoothii.github.io/dijkstra/)
 
+Reimplementation of the Dijkstra algorthm with an interface in VueJS
+
 ## Project setup
 ```
 npm install

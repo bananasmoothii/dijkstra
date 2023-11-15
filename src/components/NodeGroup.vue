@@ -110,7 +110,6 @@ export default defineComponent({
       if (! hovered || ! this.shortestPaths) return;
       const shortestPath: GraphNode[] = this.shortestPaths[hovered.key]?.path;
       if (! shortestPath) return;
-      console.log("shortestPath", shortestPath)
       for (let link of this.links) {
         const node1Index = shortestPath.indexOf(link.node1);
         if (node1Index === -1) {
@@ -142,6 +141,12 @@ export default defineComponent({
     computeShortestPathsIfPossible() {
       if (!this.startNodeForComputingPaths) return;
       this.shortestPaths = this.startNodeForComputingPaths.findShortestPaths();
+
+      // print routing table
+      console.log("Routing table:\n" + Object.keys(this.shortestPaths).map(key => {
+        let nodeAndPath = this.shortestPaths![key];
+        return `${nodeAndPath.node.name}: ${nodeAndPath.path.map(node => node.name).join(' - ')}`
+      }).join('\n'));
     },
     computeLine(start: Coord, end: Coord, base: LineBase): Line {
       // distance
